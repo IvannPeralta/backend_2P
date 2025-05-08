@@ -15,5 +15,11 @@ const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
 const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
-db.Ventas = require("./venta.model.js")(sequelize, Sequelize);
+
+// models
+db.Hotel = require("./hotel.model.js")(sequelize, Sequelize);
+db.Habitacion = require("./habitacion.model.js")(sequelize, Sequelize);
+db.Cliente = require("./cliente.model.js")(sequelize, Sequelize);
+
+
 module.exports = db;

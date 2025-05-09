@@ -8,12 +8,15 @@ module.exports = (sequelize, Sequelize) => {
         cedula: {
             type: Sequelize.STRING,
             unique: true,
+            allowNull: false
         },
         nombre: {
-            type: Sequelize.STRING
+            type: Sequelize.STRING,
+            allowNull: false
         },
         apellido: {
-            type: Sequelize.STRING
+            type: Sequelize.STRING,
+            allowNull: false
         }
 
     });

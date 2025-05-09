@@ -4,39 +4,14 @@ const Op = db.Sequelize.Op;
 
 // Crear y guardar una nueva habitacion
 exports.create = (req, res) => {
-    if (!req.body.numero) {
-        res.status(400).send({
-            message: "El numero de la habitacion no puede estar vacio!"
-        });
-        return;
-    }
 
-    if (!req.body.hotelId) {
-        res.status(400).send({
-            message: "El id del hotel no puede estar vacio!"
-        });
-        return;
-    }
-
-    if (!req.body.posicion_x) {
-        res.status(400).send({
-            message: "La posicion x de la habitacion no puede estar vacia!"
-        });
-        return;
-    }
-
-    if (!req.body.posicion_y) {
-        res.status(400).send({
-            message: "La posicion y de la habitacion no puede estar vacia!"
-        });
-        return;
-    }
-
-    if (!req.body.piso) {
-        res.status(400).send({
-            message: "El piso de la habitacion no puede estar vacio!"
-        });
-        return;
+    // Validar la solicitud
+    const requiredFields = ["numero", "hotelId", "posicion_x", "posicion_y", "piso", "capacidad"];
+    for (const field of requiredFields) {
+        if (!req.body[field]) {
+            res.status(400).send({ message: `El campo ${field} no puede estar vacío!` });
+            return;
+        }
     }
 
     const habitacion = {
@@ -52,7 +27,7 @@ exports.create = (req, res) => {
     Habitacion.create(habitacion)
     .then(data => {
         res.send(data);
-    })
+})
     .catch(err => {
         res.status(500).send({
             message:

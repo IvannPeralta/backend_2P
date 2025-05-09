@@ -4,11 +4,14 @@ const Op = db.Sequelize.Op;
 
 // Crear y guardar un nuevo hotel
 exports.create = (req, res) => {
-    if (!req.body.nombre) {
-        res.status(400).send({
-            message: "El nombre del hotel no puede estar vacio!"
-        });
-        return;
+
+    // Validar la solicitud
+    const requiredFields = ["cedula", "nombre", "apellido"];
+    for (const field of requiredFields) {
+        if (!req.body[field]) {
+            res.status(400).send({ message: `El campo ${field} no puede estar vacío!` });
+            return;
+        }
     }
 
     const hotel = {

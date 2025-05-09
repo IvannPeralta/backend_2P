@@ -20,6 +20,7 @@ db.sequelize = sequelize;
 db.Hotel = require("./hotel.model.js")(sequelize, Sequelize);
 db.Habitacion = require("./habitacion.model.js")(sequelize, Sequelize);
 db.Cliente = require("./cliente.model.js")(sequelize, Sequelize);
+db.Reserva = require("./reserva.model.js")(sequelize, Sequelize);
 
 
 module.exports = db;

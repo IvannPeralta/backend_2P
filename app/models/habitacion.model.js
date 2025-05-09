@@ -14,7 +14,8 @@ module.exports = (sequelize, Sequelize) => {
             references: {
                 model: 'Hotels',
                 key: 'id'
-            }
+            },
+            allowNull: false
         },
         posicion_x: {
             type: Sequelize.INTEGER,
@@ -25,10 +26,12 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: false
         },
         piso: { 
-            type: Sequelize.STRING
+            type: Sequelize.STRING,
+            allowNull: false
         },
         capacidad: {
-            type: Sequelize.INTEGER
+            type: Sequelize.INTEGER,
+            allowNull: false
         },
         caracteristicas: {
             type: Sequelize.TEXT

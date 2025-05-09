@@ -21,6 +21,10 @@ db.Hotel = require("./hotel.model.js")(sequelize, Sequelize);
 db.Habitacion = require("./habitacion.model.js")(sequelize, Sequelize);
 db.Cliente = require("./cliente.model.js")(sequelize, Sequelize);
 db.Reserva = require("./reserva.model.js")(sequelize, Sequelize);
-
+Object.keys(db).forEach((modelName) => {
+    if (db[modelName].associate) {
+        db[modelName].associate(db);
+    }
+});
 
 module.exports = db;

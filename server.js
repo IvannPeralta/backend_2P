@@ -4,7 +4,12 @@ const cors = require("cors");
 
 const app = express();
 const db = require("./app/models");
-db.sequelize.sync();
+// Crear las tablas si no existen
+db.sequelize.sync().then(() => {
+    console.log("Tablas sincronizadas correctamente.");
+  }).catch((err) => {
+    console.error("Error al sincronizar tablas:", err);
+  });
 
 var corsOptions = {
     origin: "http://localhost:9091"

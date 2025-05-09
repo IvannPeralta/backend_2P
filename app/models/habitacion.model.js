@@ -36,6 +36,15 @@ module.exports = (sequelize, Sequelize) => {
         caracteristicas: {
             type: Sequelize.TEXT
         }
+    }, {
+        tableName: 'Habitacions'  
     });
-    return Habitacion;
+
+    Habitacion.associate = (models) => {
+        Habitacion.hasMany(models.Reserva, {
+            foreignKey: 'id_habitacion',
+        });
     };
+
+    return Habitacion;
+};

@@ -1,6 +1,8 @@
 const db = require("../models");
 const Reserva = db.Reserva;
 const Habitacion = db.Habitacion;
+const Cliente = db.Cliente;
+const Hotel = db.Hotel;
 const Op = db.Sequelize.Op;
 
 // Crear y guardar una nueva reserva
@@ -68,4 +70,71 @@ exports.buscarDisponibles = (req, res) => {
         return res.status(404).send({ message: "No hay habitaciones disponibles para las fechas seleccionadas." });
     }
     res.status(200).send(habitacionesDisponibles);
+};
+
+
+exports.listReservas = (req, res) => {
+    const { id_hotel, fecha_ingreso, fecha_salida, id_cliente } = req.query;
+    const requiredFields = ["id_hotel","fecha_ingreso"];
+    for (const field of requiredFields) {
+        if (!req.query[field]) {
+            res.status(400).send({ message: `El campo ${field} no puede estar vacío!` });
+            return;
+        }
+    }
+
+    
+
+    try{
+        /* Formar las condiciones de la solicitud */
+        const where={
+            id_hotel:id_hotel,
+            fecha_ingreso:fecha_ingreso,
+        };
+
+        /* si existen estos parametros, agregar al criterio de la condicion */
+        if (fecha_salida) {
+            where.fecha_salida = fecha_salida;
+        }
+        if (id_cliente) {
+            where.id_cliente = id_cliente;
+        }
+        console.log(Reserva.associations);
+
+        Reserva.findAll({
+            where,
+            include: [
+                {
+                    model: Habitacion,
+                   
+                },
+                {
+                    model: Cliente,
+                   
+                },
+                {
+                    model: Hotel,
+                   
+                }
+            ],
+            order: [
+                ['fecha_ingreso', 'ASC'],
+                [{ model: Habitacion }, 'piso', 'ASC'],
+                [{ model: Habitacion }, 'numero', 'ASC']
+            ]
+        }).then(reservas => {
+            if (!reservas || reservas.length === 0) {
+                return res.status(404).send({ message: "No se encontraron reservas para los filtros proveidos" });
+            }
+            res.status(200).send(reservas);
+        }).catch(error => {
+            res.status(500).send({
+                message: "Error al obtener las reservas: " + error.message
+            });
+        });
+    } catch (error) {
+        res.status(500).send({
+            message: "Error al procesar la solicitud: " + error.message
+        });
+    }
 };

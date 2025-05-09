@@ -6,7 +6,7 @@ const Op = db.Sequelize.Op;
 exports.create = (req, res) => {
 
     // Validar la solicitud
-    const requiredFields = ["cedula", "nombre", "apellido"];
+    const requiredFields = ["nombre","direccion"];
     for (const field of requiredFields) {
         if (!req.body[field]) {
             res.status(400).send({ message: `El campo ${field} no puede estar vacío!` });

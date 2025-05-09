@@ -1,3 +1,4 @@
+
 module.exports = (sequelize, Sequelize) => {
     const Reserva = sequelize.define("Reserva", {
         id: {
@@ -29,7 +30,6 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.DATE,
             allowNull: false
         },
-        
         id_cliente: {
             type: Sequelize.BIGINT,
             allowNull: false,
@@ -41,6 +41,27 @@ module.exports = (sequelize, Sequelize) => {
         cantidad_personas: {
             type: Sequelize.INTEGER
         }
+    },  {
+            tableName:'Reservas'
     });
+
+    // Definir asociaciones
+    Reserva.associate = (models) => {
+        Reserva.belongsTo(models.Hotel, {
+            foreignKey: 'id_hotel',
+            
+        });
+
+        Reserva.belongsTo(models.Habitacion, {
+            foreignKey: 'id_habitacion',
+            
+        });
+
+        Reserva.belongsTo(models.Cliente, {
+            foreignKey: 'id_cliente',
+        
+        });
+    };
+
     return Reserva;
-}
+};

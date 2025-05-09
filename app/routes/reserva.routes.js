@@ -8,6 +8,7 @@ module.exports = app => {
     // Buscar habitaciones disponibles
     router.post("/buscarDisponibles", reserva.buscarDisponibles);
 
+    router.get("/listReservas", reserva.listReservas);
 
     app.use('/api/reserva', router);
 }

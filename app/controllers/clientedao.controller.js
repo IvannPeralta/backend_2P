@@ -21,15 +21,15 @@ exports.create = (req, res) => {
     };
 
     Cliente.create(cliente)
-    .then(data => {
-        res.send(data);
-    })
-    .catch(err => {
-        res.status(500).send({
-            message:
-                err.message || "Ha ocurrido un error al crear el cliente."
+        .then(data => {
+            res.send(data);
+        })
+        .catch(err => {
+            res.status(500).send({
+                message:
+                    err.message || "Ha ocurrido un error al crear el cliente."
+            });
         });
-    });
 };
 
 //obtener todos los clientes
@@ -38,27 +38,41 @@ exports.findAll = (req, res) => {
     var condition = nombre ? { nombre: { [Op.iLike]: `%${nombre}%` } } : null;
 
     Cliente.findAll({ where: condition })
-    .then(data => {
-        res.send(data);
-    })
-    .catch(err => {
-        res.status(500).send({
-            message:
-                err.message || "Ocurrio un error al obtener los clientes."
+        .then(data => {
+            res.send(data);
+        })
+        .catch(err => {
+            res.status(500).send({
+                message:
+                    err.message || "Ocurrio un error al obtener los clientes."
+            });
         });
-    });
 };
 
 // Obtener un cliente por id
 exports.findOne = (req, res) => {
     const id = req.params.id;
     Cliente.findByPk(id)
-    .then(data => {
-        res.send(data);
-    })
-    .catch(err => {
-        res.status(500).send({
-            message: "Error al obtener el cliente con id=" + id
+        .then(data => {
+            res.send(data);
+        })
+        .catch(err => {
+            res.status(500).send({
+                message: "Error al obtener el cliente con id=" + id
+            });
         });
-    });
+};
+
+// Obtener un cliente por cedula
+exports.findByCedula = (req, res) => {
+    const cedula = req.params.cedula;
+    Cliente.findOne({ where: { cedula: cedula } })
+        .then(data => {
+            res.send(data);
+        })
+        .catch(err => {
+            res.status(500).send({
+                message: "Error al obtener el cliente con cedula=" + cedula
+            });
+        });
 };

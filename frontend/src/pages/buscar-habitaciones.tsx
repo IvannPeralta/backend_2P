@@ -1,5 +1,5 @@
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router"
 import { useQuery } from "@tanstack/react-query"
 import { z } from "zod"
@@ -17,8 +17,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
-import { buscarHabitacionesDisponibles, type Habitacion, type BusquedaDisponibilidad } from "@/api/reserva"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { buscarHabitacionesDisponibles, type Habitacion, type BusquedaDisponibilidad, obtenerHoteles } from "@/api/reserva"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import type { ApiError } from "@/api/axios"
 
 // Esquema de validación sin transformación
@@ -44,9 +44,15 @@ const busquedaSchema = z
 // Tipo para el formulario
 type BusquedaFormValues = z.infer<typeof busquedaSchema>
 
+// Interfaz para habitaciones con información de hotel
+interface HabitacionConHotel extends Habitacion {
+  nombreHotel?: string
+}
+
 export default function BuscarHabitaciones() {
   const navigate = useNavigate()
   const [busquedaParams, setBusquedaParams] = useState<BusquedaDisponibilidad | null>(null)
+  const [habitacionesConHotel, setHabitacionesConHotel] = useState<HabitacionConHotel[]>([])
 
   // Configurar formulario con validación
   const form = useForm<BusquedaFormValues>({
@@ -54,6 +60,16 @@ export default function BuscarHabitaciones() {
     defaultValues: {
       cantidad_personas: "",
     },
+  })
+
+  // Consulta para obtener hoteles
+  const {
+    data: hoteles,
+    isLoading: isLoadingHoteles,
+    isError: isErrorHoteles,
+  } = useQuery({
+    queryKey: ["hoteles"],
+    queryFn: obtenerHoteles,
   })
 
   // Consulta para buscar habitaciones disponibles
@@ -67,6 +83,25 @@ export default function BuscarHabitaciones() {
     queryFn: () => (busquedaParams ? buscarHabitacionesDisponibles(busquedaParams) : Promise.resolve([])),
     enabled: !!busquedaParams,
   })
+
+  useEffect(() => {
+    if (!habitaciones || !hoteles) {
+      setHabitacionesConHotel([])
+      return
+    }
+
+    const hotelMap = new Map<string, string>(
+      hoteles.map((hotel) => [hotel.id, hotel.nombre])
+    )
+
+    const habitacionesActualizadas: HabitacionConHotel[] = habitaciones.map((habitacion) => ({
+      ...habitacion,
+      nombreHotel: hotelMap.get(habitacion?.id) || "Desconocido",
+    }))
+
+    setHabitacionesConHotel(habitacionesActualizadas)
+  }, [habitaciones, hoteles])
+
 
   // Extraer mensaje de error de la API
   const apiError = error as ApiError | undefined
@@ -88,7 +123,7 @@ export default function BuscarHabitaciones() {
     if (!busquedaParams) return
 
     navigate(
-      `/reservar?habitacionId=${habitacion.id}&fechaEntrada=${busquedaParams.fecha_ingreso}&fechaSalida=${busquedaParams.fecha_salida}`,
+      `/reservar?habitacionId=${habitacion.id}&hotelId=${habitacion.id}&fechaEntrada=${busquedaParams.fecha_ingreso}&fechaSalida=${busquedaParams.fecha_salida}&capacidad=${busquedaParams.cantidad_personas || 1}`,
     )
   }
 
@@ -174,10 +209,12 @@ export default function BuscarHabitaciones() {
                             mode="single"
                             selected={field.value}
                             onSelect={field.onChange}
-                            disabled={(date) =>
-                              date < new Date(new Date().setHours(0, 0, 0, 0)) ||
-                              (form.getValues().fecha_ingreso && date <= form.getValues().fecha_salida)
-                            }
+                            disabled={(date) => {
+                              const today = new Date(new Date().setHours(0, 0, 0, 0));
+                              const fechaIngreso = form.getValues().fecha_ingreso;
+
+                              return date < today || (fechaIngreso && date < new Date(fechaIngreso));
+                            }}
                             initialFocus
                           />
                         </PopoverContent>
@@ -222,17 +259,16 @@ export default function BuscarHabitaciones() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
+            {isLoading && isLoadingHoteles ? (
               <div className="flex justify-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
-            ) : isError ? (
+            ) : isError && isErrorHoteles ? (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
                 <AlertDescription>{errorMessage}</AlertDescription>
               </Alert>
-            ) : habitaciones && habitaciones.length > 0 ? (
+            ) : habitacionesConHotel && habitacionesConHotel.length > 0 ? (
               <Table>
                 <TableCaption>Lista de habitaciones disponibles</TableCaption>
                 <TableHeader>
@@ -246,9 +282,9 @@ export default function BuscarHabitaciones() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {habitaciones.map((habitacion) => (
+                  {habitacionesConHotel.map((habitacion) => (
                     <TableRow key={habitacion.id}>
-                      <TableCell className="font-medium">{habitacion.hotel}</TableCell>
+                      <TableCell className="font-medium">{habitacion.nombreHotel || habitacion.hotel}</TableCell>
                       <TableCell>{habitacion.numero}</TableCell>
                       <TableCell>{habitacion.caracteristicas}</TableCell>
                       <TableCell>{habitacion.piso}</TableCell>

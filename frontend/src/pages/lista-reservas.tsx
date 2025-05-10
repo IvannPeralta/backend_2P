@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 import type { ApiError } from "@/api/axios"
 
@@ -60,7 +60,7 @@ export default function ListaReservas() {
 
   // Consulta para obtener lista de reservas
   const {
-    data: reservas,
+    data: reservas = [],
     isLoading: isLoadingReservas,
     isError: isErrorReservas,
     error: errorReservas,
@@ -91,21 +91,6 @@ export default function ListaReservas() {
     setFiltros(nuevosFiltros)
   }
 
-  // Ordenar reservas según los criterios especificados
-  const reservasOrdenadas = reservas
-    ? [...reservas].sort((a, b) => {
-      // Primero por fecha de entrada (ascendente)
-      const fechaComparacion = new Date(a.fechaEntrada).getTime() - new Date(b.fechaEntrada).getTime()
-      if (fechaComparacion !== 0) return fechaComparacion
-
-      // Luego por piso de habitación (ascendente)
-      const pisoComparacion = (a.pisoHabitacion || 0) - (b.pisoHabitacion || 0)
-      if (pisoComparacion !== 0) return pisoComparacion
-
-      // Finalmente por número de habitación (ascendente)
-      return (a.numeroHabitacion || "").localeCompare(b.numeroHabitacion || "")
-    })
-    : []
 
   // Extraer mensaje de error de la API
   const apiError = errorReservas as ApiError | undefined
@@ -125,7 +110,6 @@ export default function ListaReservas() {
       {hayErrorDatos ? (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
           <AlertDescription>
             No se pudieron cargar los datos necesarios para el filtrado. Por favor, intente nuevamente.
           </AlertDescription>
@@ -300,15 +284,13 @@ export default function ListaReservas() {
             ) : isErrorReservas ? (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
                 <AlertDescription>{errorMessage}</AlertDescription>
               </Alert>
-            ) : reservasOrdenadas.length > 0 ? (
+            ) : reservas.length > 0 ? (
               <Table>
                 <TableCaption>Lista de reservas filtradas</TableCaption>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>ID</TableHead>
                     <TableHead>Hotel</TableHead>
                     <TableHead>Habitación</TableHead>
                     <TableHead>Piso</TableHead>
@@ -318,17 +300,16 @@ export default function ListaReservas() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {reservasOrdenadas.map((reserva) => (
+                  {reservas.map((reserva) => (
                     <TableRow key={reserva.id}>
-                      <TableCell className="font-medium">{reserva.id}</TableCell>
-                      <TableCell>{reserva.hotel}</TableCell>
-                      <TableCell>{reserva.numeroHabitacion}</TableCell>
-                      <TableCell>{reserva.pisoHabitacion}</TableCell>
+                      <TableCell>{reserva.Hotel.nombre}</TableCell>
+                      <TableCell>{reserva.Habitacion.numero}</TableCell>
+                      <TableCell>{reserva.Habitacion.piso}</TableCell>
                       <TableCell>
-                        {reserva.nombreCliente} {reserva.apellidoCliente}
+                        {reserva.Cliente.nombre} {reserva.Cliente.apellido}
                       </TableCell>
-                      <TableCell>{format(new Date(reserva.fechaEntrada), "PPP", { locale: es })}</TableCell>
-                      <TableCell>{format(new Date(reserva.fechaSalida), "PPP", { locale: es })}</TableCell>
+                      <TableCell>{format(new Date(reserva.fecha_ingreso), "PPP", { locale: es })}</TableCell>
+                      <TableCell>{format(new Date(reserva.fecha_salida), "PPP", { locale: es })}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

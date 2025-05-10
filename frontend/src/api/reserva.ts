@@ -7,7 +7,7 @@ export interface BusquedaDisponibilidad {
 }
 
 export interface Habitacion {
-  id: number
+  id: string
   hotel: string
   numero: string
   caracteristicas: string
@@ -16,7 +16,7 @@ export interface Habitacion {
 }
 
 export interface Hotel {
-  id: number
+  id: string
   nombre: string
   direccion: string
   telefono: string
@@ -37,16 +37,44 @@ export interface Usuario {
 
 export interface Reserva {
   id?: number
-  fechaEntrada: string
-  fechaSalida: string
-  habitacionId: number
-  cedula: string
-  // Campos adicionales para mostrar en la lista
-  hotel?: string
-  numeroHabitacion?: string
-  pisoHabitacion?: number
-  nombreCliente?: string
-  apellidoCliente?: string
+  id_hotel: number
+  id_habitacion: number
+  fecha_ingreso: string
+  fecha_salida: string
+  id_cliente: number
+  cantidad_personas: number
+}
+
+export interface FiltroReservaResponse {
+  id: string
+  id_hotel: string
+  id_habitacion: string
+  fecha_ingreso: string
+  fecha_salida: string
+  id_cliente: string
+  cantidad_personas: number
+  createdAt: string
+  updatedAt: string
+  Habitacion: {
+    id: string
+    numero: string
+    hotelId: string
+    posicion_x: number
+    posicion_y: number
+    piso: string
+    capacidad: number
+    caracteristicas: string
+    createdAt: string
+    updatedAt: string
+  }
+  Cliente: UserResponse
+  Hotel: {
+    id: string
+    nombre: string
+    direccion: string
+    createdAt: string
+    updatedAt: string
+  }
 }
 
 export interface FiltroReservas {
@@ -54,6 +82,15 @@ export interface FiltroReservas {
   fechaEntrada: string
   fechaSalida?: string
   clienteId?: number
+}
+
+export interface UserResponse {
+  id: number
+  cedula: string
+  nombre: string
+  apellido: string
+  updatedAt: string
+  createdAt: string
 }
 
 // Buscar habitaciones disponibles
@@ -77,7 +114,7 @@ export const crearReserva = async (reserva: Reserva): Promise<Reserva> => {
 }
 
 // Obtener lista de reservas con filtros
-export const obtenerReservas = async (filtros?: FiltroReservas): Promise<Reserva[]> => {
+export const obtenerReservas = async (filtros?: FiltroReservas): Promise<FiltroReservaResponse[]> => {
   try {
     // Si hay filtros, añadirlos como parámetros de consulta
     const params = filtros ? new URLSearchParams() : undefined
@@ -104,9 +141,9 @@ export const obtenerReservas = async (filtros?: FiltroReservas): Promise<Reserva
 }
 
 // Buscar usuario por cédula (simulado, ya que no está en el backend proporcionado)
-export const buscarUsuario = async (cedula: string): Promise<Usuario | null> => {
+export const buscarUsuario = async (cedula: string): Promise<UserResponse | null> => {
   try {
-    const response = await api.get(`/usuario/${cedula}/`)
+    const response = await api.get(`/cliente/cedula/${cedula}/`)
     return response.data
   } catch (error) {
     throw handleApiError(error)
@@ -114,9 +151,9 @@ export const buscarUsuario = async (cedula: string): Promise<Usuario | null> => 
 }
 
 // Crear usuario (simulado, ya que no está en el backend proporcionado)
-export const crearUsuario = async (usuario: Usuario): Promise<Usuario> => {
+export const crearUsuario = async (usuario: Usuario): Promise<UserResponse> => {
   try {
-    const response = await api.post("/usuario", usuario)
+    const response = await api.post("/cliente", usuario)
     return response.data
   } catch (error) {
     throw handleApiError(error)

@@ -8,6 +8,9 @@ module.exports = app => {
     // Obtener todos los clientes o un cliente por id
     router.get("/:id", cliente.findOne);
 
+    // Obtener todos los clientes o un cliente por id
+    router.get("/cedula/:cedula", cliente.findByCedula);
+
     // Obtener todos los clientes
     router.get("/", cliente.findAll);
 

@@ -49,3 +49,33 @@ api.interceptors.response.use(
     return Promise.reject(error)
   },
 )
+
+// Interfaz para errores de API
+export interface ApiError {
+  message: string
+  status?: number
+  details?: any
+}
+
+// Función auxiliar para manejar errores de API
+export const handleApiError = (error: any): ApiError => {
+  if (error.response) {
+    // El servidor respondió con un código de estado fuera del rango 2xx
+    return {
+      message: error.response.data.message || "Error en la solicitud",
+      status: error.response.status,
+      details: error.response.data
+    }
+  } else if (error.request) {
+    // La solicitud se realizó pero no se recibió respuesta
+    return {
+      message: "No se recibió respuesta del servidor",
+      details: error.request
+    }
+  } else {
+    // Ocurrió un error al configurar la solicitud
+    return {
+      message: error.message || "Error al realizar la solicitud"
+    }
+  }
+}

@@ -15,7 +15,20 @@ exports.create = (req, res) => {
             return;
         }
     }
+    
+    Habitacion.findByPk(req.body.id_habitacion)
+        .then(habitacion => {
+            if (!habitacion) {
+                res.status(404).send({ message: "La habitación especificada no existe." });
+                return;
+            }
 
+            if (req.body.cantidad_personas > habitacion.capacidad) {
+                res.status(400).send({ message: "La cantidad de personas excede la capacidad de la habitación." });
+                return;
+            }
+        }
+    )
     const reserva = {
         id_hotel: req.body.id_hotel,
         id_habitacion: req.body.id_habitacion,
@@ -38,7 +51,10 @@ exports.create = (req, res) => {
 };
 
 
+// Buscar habitaciones disponibles
 exports.buscarDisponibles = (req, res) => {
+
+    // Validar la solicitud
     const requiredFields = ["fecha_ingreso", "fecha_salida"];
     for (const field of requiredFields) {
         if (!req.body[field]) {
@@ -47,33 +63,62 @@ exports.buscarDisponibles = (req, res) => {
         }
     }
 
-    // buscar habitaciones disponibles
     const fecha_ingreso = req.body.fecha_ingreso;
     const fecha_salida = req.body.fecha_salida;
-    const capacidad = req.body.capacidad || 1; // Default to 1 if not provided
+    const capacidad = req.body.capacidad || 1;
 
-    const habitaciones = Habitacion.findAll({
+    Reserva.findAll({
         where: {
-            id: {
-                [Op.notIn]: Sequelize.literal(`(
-                    SELECT id_habitacion FROM Reservas
-                    WHERE (fecha_ingreso <= '${fecha_salida}' AND fecha_salida >= '${fecha_ingreso}')
-                )`)
-            }
+            [Op.and]: [
+                {
+                    fecha_ingreso: {
+                    [Op.lt]: fecha_salida
+                    }
+                },
+                {
+                    fecha_salida: {
+                    [Op.gt]: fecha_ingreso
+                    }
+                }
+            ]
         }
+    })
+    .then(reservas => {
+        const habitacionesOcupadas = reservas.map(reserva => reserva.id_habitacion);
+
+        Habitacion.findAll()
+            .then(habitaciones => {
+                // Filtrar habitaciones disponibles
+                const habitacionesDisponibles = habitaciones.filter(habitacion => {
+                    return !habitacionesOcupadas.includes(habitacion.id) && habitacion.capacidad >= capacidad;
+                });
+
+                if (habitacionesDisponibles.length === 0) {
+                    return res.status(404).send({ message: "No hay habitaciones disponibles para las fechas seleccionadas." });
+                }
+                const habitacionesSinTimestamps = habitacionesDisponibles.map(habitacion => {
+                    const { createdAt, updatedAt, ...rest } = habitacion.toJSON();
+                    return rest;
+                });
+                res.status(200).send(habitacionesSinTimestamps);
+            })
+            .catch(err => {
+                res.status(500).send({
+                    message: err.message || "Ha ocurrido un error al buscar habitaciones disponibles."
+                });
+            });
+    })
+    .catch(err => {
+        res.status(500).send({
+            message: err.message || "Ha ocurrido un error al buscar reservas."
+        });
     });
-
-    // verificar la capacidad de las habitaciones
-    const habitacionesDisponibles = habitaciones.filter(habitacion => habitacion.capacidad >= capacidad);
-
-    if (habitacionesDisponibles.length === 0) {
-        return res.status(404).send({ message: "No hay habitaciones disponibles para las fechas seleccionadas." });
-    }
-    res.status(200).send(habitacionesDisponibles);
 };
 
-
+// Obtener las reservas 
 exports.listReservas = (req, res) => {
+
+    // Validar la solicitud
     const { id_hotel, fecha_ingreso, fecha_salida, id_cliente } = req.query;
     const requiredFields = ["id_hotel","fecha_ingreso"];
     for (const field of requiredFields) {
@@ -83,13 +128,11 @@ exports.listReservas = (req, res) => {
         }
     }
 
-    
-
     try{
         /* Formar las condiciones de la solicitud */
-        const where={
-            id_hotel:id_hotel,
-            fecha_ingreso:fecha_ingreso,
+        const where = {
+            id_hotel: id_hotel,
+            fecha_ingreso: fecha_ingreso,
         };
 
         /* si existen estos parametros, agregar al criterio de la condicion */

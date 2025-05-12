@@ -85,22 +85,24 @@ export default function BuscarHabitaciones() {
   })
 
   useEffect(() => {
-    if (!habitaciones || !hoteles) {
-      setHabitacionesConHotel([])
-      return
-    }
+  if (!habitaciones || !hoteles) {
+    setHabitacionesConHotel([]) 
+    return
+  }
 
-    const hotelMap = new Map<string, string>(
-      hoteles.map((hotel) => [hotel.id, hotel.nombre])
-    )
+  
+  const hotelMap = new Map<string, string>(hoteles.map((hotel) => [hotel.id, hotel.nombre]))
 
-    const habitacionesActualizadas: HabitacionConHotel[] = habitaciones.map((habitacion) => ({
-      ...habitacion,
-      nombreHotel: hotelMap.get(habitacion?.id) || "Desconocido",
-    }))
+  // Asociar cada habitación con su nombre de hotel correspondiente
+  const habitacionesActualizadas: HabitacionConHotel[] = habitaciones.map((habitacion) => ({
+    ...habitacion,
+    
+    nombreHotel: hotelMap.get(habitacion.hotelId.toString()) || "Desconocido", 
+  }))
 
-    setHabitacionesConHotel(habitacionesActualizadas)
-  }, [habitaciones, hoteles])
+  setHabitacionesConHotel(habitacionesActualizadas)
+}, [habitaciones, hoteles])
+
 
 
   // Extraer mensaje de error de la API
@@ -284,7 +286,7 @@ export default function BuscarHabitaciones() {
                 <TableBody>
                   {habitacionesConHotel.map((habitacion) => (
                     <TableRow key={habitacion.id}>
-                      <TableCell className="font-medium">{habitacion.nombreHotel || habitacion.hotel}</TableCell>
+                      <TableCell className="font-medium">{habitacion.nombreHotel || habitacion.hotelId}</TableCell>
                       <TableCell>{habitacion.numero}</TableCell>
                       <TableCell>{habitacion.caracteristicas}</TableCell>
                       <TableCell>{habitacion.piso}</TableCell>

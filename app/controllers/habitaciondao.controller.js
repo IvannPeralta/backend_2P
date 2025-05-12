@@ -39,7 +39,9 @@ exports.create = (req, res) => {
 // Obtener  una habitacion por id
 exports.findOne = (req, res) => {
     const id = req.params.id;
-    Habitacion.findByPk(id)
+    Habitacion.findByPk(id,{
+        attributes: { exclude: ['createdAt', 'updatedAt'] }
+    })
     .then(data => {
         if (data === null) {
             res.status(404).send({
@@ -61,7 +63,10 @@ exports.findAll = (req, res) => {
     const hotelId = req.query.hotelId;
     var condition = hotelId ? { hotelId: { [Op.iLike]: `%${hotelId}%` } } : null;
 
-    Habitacion.findAll({ where: condition })
+    Habitacion.findAll({ 
+        where: condition,
+        attributes: { exclude: ['createdAt', 'updatedAt'] }
+     })
     .then(data => {
         res.send(data);
     })
@@ -86,7 +91,7 @@ exports.update = (req, res) => {
                 message: "Habitacion actualizada correctamente."
             });
         } else {
-            res.send({
+            res.status(400).send({
                 message: `No se puede actualizar la habitacion con id=${id}. Tal vez no fue encontrada o req.body esta vacio!`
             });
         }
@@ -111,7 +116,7 @@ exports.delete = (req, res) => {
                 message: "Habitacion eliminada correctamente!"
             });
         } else {
-            res.send({
+            res.status(400).send({
                 message: `No se puede eliminar la habitacion con id=${id}. Tal vez no fue encontrada!`
             });
         }

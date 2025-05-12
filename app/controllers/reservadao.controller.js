@@ -17,49 +17,43 @@ exports.create = (req, res) => {
   ];
   for (const field of requiredFields) {
     if (!req.body[field]) {
-      res
-        .status(400)
-        .send({ message: `El campo ${field} no puede estar vacío!` });
+      res.status(400).send({ message: `El campo ${field} no puede estar vacío!` });
       return;
     }
   }
 
-  Habitacion.findByPk(req.body.id_habitacion).then((habitacion) => {
+  Habitacion.findByPk(req.body.id_habitacion)
+  .then((habitacion) => {
     if (!habitacion) {
-      res
-        .status(404)
-        .send({ message: "La habitación especificada no existe." });
-      return;
+      return res.status(404).send({ message: "La habitación especificada no existe." });
     }
 
     if (req.body.cantidad_personas > habitacion.capacidad) {
-      res
-        .status(400)
-        .send({
-          message:
-            "La cantidad de personas excede la capacidad de la habitación.",
-        });
-      return;
+       return res.status(400).send({ message: "La cantidad de personas excede la capacidad de la habitación." });
     }
-  });
-  const reserva = {
+
+    const reserva = {
     id_hotel: req.body.id_hotel,
     id_habitacion: req.body.id_habitacion,
     fecha_ingreso: req.body.fecha_ingreso,
     fecha_salida: req.body.fecha_salida,
     id_cliente: req.body.id_cliente,
     cantidad_personas: req.body.cantidad_personas || 1,
-  };
+    };
 
-  Reserva.create(reserva)
-    .then((data) => {
-      res.send(data);
-    })
-    .catch((err) => {
+    return Reserva.create(reserva)
+    .then((data) => res.send(data))
+    .catch((err) => 
       res.status(500).send({
         message: err.message || "Ha ocurrido un error al crear la reserva.",
-      });
-    });
+      })
+    );
+  })
+  .catch((err) =>
+    res.status(500).send({
+      message: "Error al validar la habitación: " + err.message,
+    })
+  );
 };
 
 // Buscar habitaciones disponibles
@@ -77,7 +71,7 @@ exports.buscarDisponibles = (req, res) => {
 
   const fecha_ingreso = req.body.fecha_ingreso;
   const fecha_salida = req.body.fecha_salida;
-  const capacidad = req.body.capacidad || 1;
+  const capacidad = req.body.cantidad_personas || 1;
 
   Reserva.findAll({
     where: {
@@ -148,63 +142,52 @@ exports.listReservas = (req, res) => {
   const requiredFields = ["id_hotel", "fecha_ingreso"];
   for (const field of requiredFields) {
     if (!req.query[field]) {
-      res
-        .status(400)
-        .send({ message: `El campo ${field} no puede estar vacío!` });
+      res.status(400).send({ message: `El campo ${field} no puede estar vacío!` });
       return;
     }
   }
 
   try {
-    const startOfDay = new Date(fecha_ingreso);
-    startOfDay.setUTCHours(0, 0, 0, 0);
-    const endOfDay = new Date(startOfDay);
-    endOfDay.setUTCHours(23, 59, 59, 999);
-
     /* Formar las condiciones de la solicitud */
     const where = {
       id_hotel: id_hotel,
-      fecha_ingreso: {
-        [Op.between]: [startOfDay, endOfDay],
-      },
+      fecha_ingreso: fecha_ingreso
     };
 
     /* si existen estos parametros, agregar al criterio de la condicion */
     if (fecha_salida) {
-      const endSalida = new Date(fecha_salida);
-      where.fecha_salida = {
-        [Op.gte]: endSalida,
-      };
+      where.fecha_salida = fecha_salida
     }
     if (id_cliente) {
       where.id_cliente = id_cliente;
     }
-    console.log(Reserva.associations);
 
     Reserva.findAll({
       where,
+      attributes: { exclude: ['createdAt', 'updatedAt'] },
       include: [
-        {
-          model: Habitacion,
-        },
-        {
-          model: Cliente,
-        },
-        {
-          model: Hotel,
-        },
+      {
+        model: Habitacion,
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
+      },
+      {
+        model: Cliente,
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
+      },
+      {
+        model: Hotel,
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
+      },
       ],
       order: [
-        ["fecha_ingreso", "ASC"],
-        [{ model: Habitacion }, "piso", "ASC"],
-        [{ model: Habitacion }, "numero", "ASC"],
+      ["fecha_ingreso", "ASC"],
+      [{ model: Habitacion }, "piso", "ASC"],
+      [{ model: Habitacion }, "numero", "ASC"],
       ],
     })
       .then((reservas) => {
         if (!reservas || reservas.length === 0) {
-          return res
-            .status(404)
-            .send({
+          return res.status(404).send({
               message: "No se encontraron reservas para los filtros proveidos",
             });
         }

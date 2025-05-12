@@ -23,11 +23,11 @@ module.exports = (sequelize, Sequelize) => {
             }
         },
         fecha_ingreso: {
-            type: Sequelize.DATE,
+            type: Sequelize.DATEONLY,
             allowNull: false
         },
         fecha_salida: {
-            type: Sequelize.DATE,
+            type: Sequelize.DATEONLY,
             allowNull: false
         },
         id_cliente: {

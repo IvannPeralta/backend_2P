@@ -148,7 +148,15 @@ export default function ReservarHabitacion() {
   // Manejar envío del formulario
   const onSubmit = async (values: ReservaFormValues) => {
     if (!parametrosValidos || !hotelId || !habitacionId || !fechaEntrada) return
+    const cantidadSolicitada = Number(values.cantidad_personas);
+    const capacidadHabitacion = Number(capacidad); 
 
+    if (cantidadSolicitada > capacidadHabitacion) {
+      form.setError("cantidad_personas", {
+        message: `La capacidad máxima de esta habitación es ${capacidadHabitacion}`,
+      });
+      return;
+    }
     try {
 
       let finalClienteId = clienteId

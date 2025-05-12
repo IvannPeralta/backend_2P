@@ -8,7 +8,7 @@ export interface BusquedaDisponibilidad {
 
 export interface Habitacion {
   id: string
-  hotel: string
+  hotelId: number
   numero: string
   caracteristicas: string
   piso: number

@@ -31,14 +31,16 @@ exports.create = (req, res) => {
     });
 };
 
-// Obtener  un hotel por id
+// Obtener un hotel por id sin los campos createdAt y updatedAt
 exports.findOne = (req, res) => {
     const id = req.params.id;
-    Hotel.findByPk(id)
+    Hotel.findByPk(id, {
+        attributes: { exclude: ['createdAt', 'updatedAt'] }
+    })
     .then(data => {
         if (data == null) {
             res.status(404).send({
-                message: "No se encontro el hotel con id=" + id
+                message: "No se encontró el hotel con id=" + id
             });
             return;
         }
@@ -49,14 +51,17 @@ exports.findOne = (req, res) => {
             message: "Error al obtener el hotel con id=" + id
         });
     });
-}
+};
 
-// Obtener todos los hoteles
+// Obtener todos los hoteles sin los campos createdAt y updatedAt
 exports.findAll = (req, res) => {
     const nombre = req.query.nombre;
     var condition = nombre ? { nombre: { [Op.iLike]: `%${nombre}%` } } : null;
 
-    Hotel.findAll({ where: condition })
+    Hotel.findAll({ 
+        where: condition,
+        attributes: { exclude: ['createdAt', 'updatedAt'] }
+    })
     .then(data => {
         res.send(data);
     })
@@ -81,7 +86,7 @@ exports.update = (req, res) => {
                 message: "El hotel fue actualizado exitosamente."
             });
         } else {
-            res.send({
+            res.status(400).send({
                 message: `No se puede actualizar el hotel con id=${id}. Quizas no existe o el body esta vacio!`
             });
         }
@@ -107,7 +112,7 @@ exports.delete = (req, res) => {
             });
         }
         else {
-            res.send({
+            res.status(400).send({
                 message: `No se puede eliminar el hotel con id=${id}. Quizas no existe!`
             });
         }

@@ -308,8 +308,8 @@ export default function ListaReservas() {
                       <TableCell>
                         {reserva.Cliente.nombre} {reserva.Cliente.apellido}
                       </TableCell>
-                      <TableCell>{format(new Date(reserva.fecha_ingreso), "PPP", { locale: es })}</TableCell>
-                      <TableCell>{format(new Date(reserva.fecha_salida), "PPP", { locale: es })}</TableCell>
+                      <TableCell>{format(new Date(`${reserva.fecha_ingreso}T00:00:00`), "PPP", { locale: es })}</TableCell>
+                      <TableCell>{format(new Date(`${reserva.fecha_salida}T00:00:00`), "PPP", { locale: es })}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

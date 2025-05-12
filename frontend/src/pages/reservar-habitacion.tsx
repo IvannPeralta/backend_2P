@@ -84,7 +84,7 @@ export default function ReservarHabitacion() {
       nombre: "",
       apellido: "",
       cantidad_personas: parseInt(capacidad),
-      fecha_salida: fechaSalida ? new Date(fechaSalida) : undefined,
+      fecha_salida: fechaSalida ? new Date(`${fechaSalida}T00:00:00`) : undefined,
     },
   })
 
@@ -94,7 +94,7 @@ export default function ReservarHabitacion() {
       form.setValue("cantidad_personas", parseInt(capacidad))
     }
     if (fechaSalida) {
-      form.setValue("fecha_salida", new Date(fechaSalida))
+      form.setValue("fecha_salida", new Date(`${fechaSalida}T00:00:00`))
     }
   }, [capacidad, fechaSalida, form])
 

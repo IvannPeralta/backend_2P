@@ -125,7 +125,7 @@ export default function BuscarHabitaciones() {
     if (!busquedaParams) return
 
     navigate(
-      `/reservar?habitacionId=${habitacion.id}&hotelId=${habitacion.id}&fechaEntrada=${busquedaParams.fecha_ingreso}&fechaSalida=${busquedaParams.fecha_salida}&capacidad=${busquedaParams.cantidad_personas || 1}`,
+      `/reservar?habitacionId=${habitacion.id}&hotelId=${habitacion.hotelId}&fechaEntrada=${busquedaParams.fecha_ingreso}&fechaSalida=${busquedaParams.fecha_salida}&capacidad=${busquedaParams.cantidad_personas || 1}`,
     )
   }
 

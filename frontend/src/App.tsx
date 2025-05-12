@@ -5,7 +5,7 @@ import { ModeToggle } from "@/components/mode-toggle"
 import BuscarHabitaciones from "./pages/buscar-habitaciones"
 import ReservarHabitacion from "./pages/reservar-habitacion"
 import ListaReservas from "./pages/lista-reservas"
-
+import MapaHabitaciones from "./pages/mapa-habitaciones"
 function Layout() {
   return (
     <div className="min-h-screen bg-background">
@@ -21,6 +21,9 @@ function Layout() {
               </Link>
               <Link to="/lista-reservas" className="transition-colors hover:text-foreground/80">
                 Lista de Reservas
+              </Link>
+              <Link to="/mapa" className="transition-colors hover:text-foreground/80">
+                Mapa de Habitaciones
               </Link>
             </nav>
           </div>
@@ -43,6 +46,7 @@ export default function App() {
         <Route index element={<BuscarHabitaciones />} />
         <Route path="reservar" element={<ReservarHabitacion />} />
         <Route path="lista-reservas" element={<ListaReservas />} />
+        <Route path="mapa" element={<MapaHabitaciones />}/>
       </Route>
     </Routes>
   )

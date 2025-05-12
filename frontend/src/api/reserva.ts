@@ -77,6 +77,16 @@ export interface FiltroReservaResponse {
   }
 }
 
+export interface HabitacionResponse {
+  id: string
+  hotelId: number
+  numero: string
+  caracteristicas: string
+  piso: number
+  posicion_x: number
+  posicion_y: number
+  capacidad: number
+}
 export interface FiltroReservas {
   hotelId: number
   fechaEntrada: string
@@ -204,6 +214,15 @@ export const obtenerClientePorId = async (id: number): Promise<Cliente> => {
 export const obtenerHabitacionPorId = async (id: number): Promise<Habitacion> => {
   try {
     const response = await api.get(`/habitacion/${id}`)
+    return response.data
+  } catch (error) {
+    throw handleApiError(error)
+  }
+}
+
+export const obtenerAllHabitaciones = async (): Promise<HabitacionResponse[]> => {
+  try {
+    const response = await api.get("/habitacion")
     return response.data
   } catch (error) {
     throw handleApiError(error)

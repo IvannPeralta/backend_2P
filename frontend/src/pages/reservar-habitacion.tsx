@@ -64,7 +64,10 @@ export default function ReservarHabitacion() {
   const hotelId = searchParams.get("hotelId")
   const fechaEntrada = searchParams.get("fechaEntrada")
   const fechaSalida = searchParams.get("fechaSalida")
-  const capacidad = searchParams.get("capacidad") || "1"
+  const capacidadMaxima = searchParams.get("capacidadMaxima");
+  const capacidad = searchParams.get("capacidad") 
+    ? Math.min(parseInt(searchParams.get("capacidad")!), parseInt(capacidadMaxima!)) 
+    : 1;  
 
   const [usuarioEncontrado, setUsuarioEncontrado] = useState(false)
   const [buscandoUsuario, setBuscandoUsuario] = useState(false)
@@ -83,15 +86,15 @@ export default function ReservarHabitacion() {
       cedula: "",
       nombre: "",
       apellido: "",
-      cantidad_personas: parseInt(capacidad),
+      cantidad_personas: capacidad,
       fecha_salida: fechaSalida ? new Date(`${fechaSalida}T00:00:00`) : undefined,
     },
-  })
+  });
 
   // Efecto para actualizar el formulario cuando cambian los parámetros de URL
   useEffect(() => {
     if (capacidad) {
-      form.setValue("cantidad_personas", parseInt(capacidad))
+      form.setValue("cantidad_personas", capacidad);
     }
     if (fechaSalida) {
       form.setValue("fecha_salida", new Date(`${fechaSalida}T00:00:00`))
@@ -149,7 +152,7 @@ export default function ReservarHabitacion() {
   const onSubmit = async (values: ReservaFormValues) => {
     if (!parametrosValidos || !hotelId || !habitacionId || !fechaEntrada) return
     const cantidadSolicitada = Number(values.cantidad_personas);
-    const capacidadHabitacion = Number(capacidad); 
+    const capacidadHabitacion = Number(capacidad);
 
     if (cantidadSolicitada > capacidadHabitacion) {
       form.setError("cantidad_personas", {

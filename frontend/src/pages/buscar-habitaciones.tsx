@@ -120,14 +120,17 @@ export default function BuscarHabitaciones() {
     setBusquedaParams(params)
   }
 
-  // Manejar selección de habitación
   const seleccionarHabitacion = (habitacion: Habitacion) => {
-    if (!busquedaParams) return
+  if (!busquedaParams) return;
 
-    navigate(
-      `/reservar?habitacionId=${habitacion.id}&hotelId=${habitacion.hotelId}&fechaEntrada=${busquedaParams.fecha_ingreso}&fechaSalida=${busquedaParams.fecha_salida}&capacidad=${busquedaParams.cantidad_personas || 1}`,
-    )
-  }
+  // Obtener la capacidad máxima de la habitación
+  const capacidadMaxima = habitacion.capacidad;
+
+  navigate(
+    `/reservar?habitacionId=${habitacion.id}&hotelId=${habitacion.hotelId}&fechaEntrada=${busquedaParams.fecha_ingreso}&fechaSalida=${busquedaParams.fecha_salida}&capacidad=${busquedaParams.cantidad_personas || capacidadMaxima}`,
+  );
+}
+
 
   return (
     <div className="space-y-6">
